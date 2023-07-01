@@ -1,0 +1,3 @@
+polars
+psutil
+memory_profiler

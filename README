@@ -1,0 +1,61 @@
+
+How it works : 
+-To make the script works, you have to run  `chmod +x runner.sh` then `sh runner.sh`
+- put the right files into the `in` folder  
+
+- Explanation : 
+
+The solution uses Python as a Programming language and Polars, a fast DataFrame library, to handle the data processing and aggregation. It reads the log files in chunks, applies aggregations, and writes intermediate and final results to disk. The script takes into account the date of the log files and processes the files created within the last 7 days.
+
+Here are the steps followed : 
+
+1. Retrieve files from the "processed_logs" folder that are no more than 7 days old, along with a daily file.
+2. For each file:
+    - Read up to 500,000 lines, filter by country code (two letters), and exclude null values for each field.
+    - Compute aggregation using a window function to count occurrences by country and song ID.
+    - Drop duplicate entries based on country and song ID.
+    - Write out each chunk as a temporary file (e.g., "count_aggregation_temp1_listen-20230510.log").
+    - Read in each chunk and compute a sum aggregation over country and song ID.
+    - Compute a rank aggregation over country and song ID.
+    - Filter for the top 50 songs for each country.
+    - Write the output to a new temporary file (e.g., "intermediary_ranked_5_listen-20230514.log").
+
+3. Read all temporary files with aggregated data to create a single file.
+4. Calculate a rank over country and song ID based on the monofile.
+5. Filter for the top 50 songs for each country.
+6. Write the output to a single file that follows this format: "country_top50_2023-05-16.txt".
+
+
+Functions : 
+
+1. The `move_recent_files_to_directory` function moves the recently processed log files from the "processed_logs" directory to the "in" directory.
+
+2. The `count_rows_in_logs` function uses subprocess to execute commands (find, wc, awk) to count the number of rows in a log file.
+
+3. The `extract_date_from_filename` function extracts the date from a given filename.
+
+4. The `get_all_files_in_specific_folder` function retrieves all the log files in the "in" directory.
+
+5. The `join_strings` function concatenates strings in an array using a specified separator.
+
+6. The `read_logs_by_chunk_and_write_aggregation_by_chunk` function reads log files in chunks, applies transformations, and writes aggregated data to temporary files.
+
+7. The `reduce_aggregated_wrote_counts` function reduces the aggregated counts from the temporary files and writes the results to intermediate files.
+
+8. The `collect_final_result_from_reduce_aggregated_wrote_counts` function reads the intermediate files, performs additional aggregations, and returns the final result as a DataFrame.
+
+9. The `write_final_result` function writes the final result DataFrame to the output file.
+
+10. The script imports necessary modules and sets up constants, such as input file paths, output file patterns, separator, and chunk size.
+
+11. The `my_function` is defined as the main function that orchestrates the entire process. It calls the necessary functions in the appropriate order to generate the final result.
+
+12. The `my_function` is decorated with `@profile` to profile the memory usage.
+
+13. Finally, the `my_function` is called to execute the entire process.
+
+*******************************************************************************************************************
+
+
+
+
